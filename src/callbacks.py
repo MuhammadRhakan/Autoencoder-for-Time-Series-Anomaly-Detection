@@ -1,9 +1,13 @@
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+from pathlib import Path
 
-def configuration_settings():
-    checkpoint_path = "model/checkpoints/model_epoch_{epoch:02d}_val_loss_{val_loss:.4f}.weights.h5"
+
+def configuration_settings(config):
+    checkpoints_dir = Path(config['output']['checkpoints'])
+    checkpoints_dir.mkdir(parents=True, exist_ok=True)
+
     checkpoint = ModelCheckpoint(
-        filepath=checkpoint_path,   
+        filepath=checkpoints_dir / "model_epoch_{epoch:02d}_val_loss_{val_loss:.4f}.weights.h5",   
         monitor='val_loss',
         save_best_only=True,
         mode='min',

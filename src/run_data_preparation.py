@@ -101,7 +101,7 @@ def main():
     # Save all datasets
     #----------------------------
     np.savez_compressed(
-        Path(config['output']['processed_dir']) / "processed_datasets.npz",
+        Path(config['dataset']['processed_dir']) / "processed_datasets.npz",
         X_train=X_train_transformed,
         X_val=X_val_transformed,
         X_test=X_test_transformed,
@@ -111,7 +111,7 @@ def main():
     print("Preprocessed datasets saved successfully.")
 
     np.savez_compressed(
-        Path(config['output']['tensor_dir']) / "tensors.npz",
+        Path(config['dataset']['tensor_dir']) / "tensors.npz",
         train_ds=X_train_windows,
         val_ds=X_val_windows,
         test_ds=X_test_windows,

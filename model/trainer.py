@@ -1,3 +1,5 @@
+import os
+import glob
 import yaml
 import numpy as np
 import tensorflow as tf
@@ -26,7 +28,7 @@ class MSTCN_AutoEncoder:
         train_ds,
         val_ds,
         test_ds,
-    ):    
+    ):
         self.batch_size = config['batch_size']
         self.features = features
         self.latent_dim = latent_dim
@@ -40,20 +42,18 @@ class MSTCN_AutoEncoder:
             .shuffle(buffer_size=len(train_ds))
             .batch(self.batch_size)
             .prefetch(tf.data.AUTOTUNE))
-        
+
         self.val_tensor = (
             tf.data.Dataset.from_tensor_slices((val_ds, val_ds))
             .batch(self.batch_size)
             .prefetch(tf.data.AUTOTUNE))
-        
+
         self.test_tensor = (
             tf.data.Dataset.from_tensor_slices((test_ds, test_ds))
             .batch(self.batch_size)
             .prefetch(tf.data.AUTOTUNE))
 
-        self.mstcn_autoencoder = AutoEncoder(
-            features=self.features,
-            latent_dim=self.latent_dim)
+        self.mstcn_autoencoder = AutoEncoder(features=self.features, latent_dim=self.latent_dim)
 
     def train(self, epochs, learning_rate, callbacks):
         self.mstcn_autoencoder.compile(
@@ -66,6 +66,17 @@ class MSTCN_AutoEncoder:
             epochs=epochs,
             callbacks=callbacks,
             verbose=1)
+        
+        return self
+        
+    def load_best_weights(self, checkpoint_path):
+        weight_files = glob.glob(os.path.join(checkpoint_path, "*.weights.h5"))
+
+        if not weight_files:
+            raise FileNotFoundError(f"No file found in {checkpoint_path}")
+
+        best_weight = max(weight_files, key=os.path.getmtime)
+        return self.mstcn_autoencoder.load_weights(best_weight)
 
     def calculate_anomaly_scores(self, data):
         reconstruction = self.mstcn_autoencoder.predict(data)
@@ -74,18 +85,11 @@ class MSTCN_AutoEncoder:
     def determine_thresholds(self, reference_anomaly_scores, percentile):
         return np.percentile(reference_anomaly_scores, percentile, axis=(0, 1))
 
-    def detect_anomalies(self, baseline='train', percentile=95):
-        if baseline == 'train':
-            reference_anomaly_scores = self.calculate_anomaly_scores(self.train_ds)
-        elif baseline == 'val':
-            reference_anomaly_scores = self.calculate_anomaly_scores(self.val_ds)
+    def detect_anomalies(self, reference_scores, target_scores, percentile):
+        thresholds = self.determine_thresholds(reference_scores, percentile)
+        detection_results = (target_scores > thresholds).astype(int)
+        return detection_results
 
-        thresholds = self.determine_thresholds(reference_anomaly_scores, percentile)
-        anomaly_scores = self.calculate_anomaly_scores(self.test_ds)
-        detection_results = (anomaly_scores > thresholds).astype(int)
-
-        return anomaly_scores, detection_results
-        
     def evaluate(self, anomaly_scores, ground_truth, detection_results, minimum_abnormal_features):
         # Threshold-dependent evaluation metrics
         full_timesteps = ground_truth.flatten()
@@ -126,7 +130,25 @@ class MSTCN_AutoEncoder:
         plt.tight_layout()
         plt.show()
 
+        return {'precision': precision, 'recall': recall, 'f1': f1}
 
 
+    def tune_hyperparameters(self, reference_scores,target_scores, ground_truth, percentile_grid, min_features_grid):
+        best_scores = -1
+        best_params = {}
+        results_history = []
 
+        for pct in percentile_grid:
+            detection_results = self.detect_anomalies(reference_scores, target_scores, pct)
 
+            for features in range(1, min_features_grid + 1):
+                metrics = self.evaluate(target_scores, ground_truth, detection_results, features)
+
+                record = {'percentile': pct, 'minimum_abnormal_features': features, **metrics}
+                results_history.append(record)
+
+                if metrics['f1'] > best_scores:
+                    best_scores = metrics['f1']
+                    best_params = record
+
+        return best_params, results_history
