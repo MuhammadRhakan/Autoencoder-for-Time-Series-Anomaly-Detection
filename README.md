@@ -1,23 +1,23 @@
 # Multi-Scale Temporal Convolutional Network Autoencoder
 
-Autoencoder architecture for time-series anomaly detection with a multi-scale encoder block and multiple TCN blocks on the decoder layer.
+Autoencoder architecture for time-series anomaly detection with a multi-scale encoder block and TCN residual blocks on the decoder layer.
 
 ## Executive Summary
 This project implements an end-to-end unsupervised anomaly detection pipeline for multivariate time-series data in Cyber-Physical Systems. Trained exclusively on normal operational conditions, the autoencoder detects abnormal behaviours by measuring reconstruction error deviations against defined thresholds.
 
 ## Key Highlights
 * **Multi-Scale Feature Extraction:** Captures short-term spikes alongside long-range temporal dependencies across industrial sensors.
-* **Temporal Convolutional Network (TCN):** Employs causal dilated convolutions to expand receptive fields without recurring memory bottlenecks typical of recurrent neural networks.
+* **Temporal Convolutional Network:** Applies causal dilated convolutions to expand receptive fields without recurring memory bottlenecks.
 * **Project Pipeline:** Modular codebase separating preprocessing, windowing, reconstruction-based inference, and metric evaluation.
 
 ### Performance Results
 | Metric | Score | Notes |
 | :--- | :--- | :--- |
 | **Precision** | `0.99` | Minimized false positives during steady-state |
-| **Recall** | `0.65` | High capture rate on stealthy bias attacks |
+| **Recall** | `0.65` | Capture rate on stealthy bias attacks |
 | **F1-Score** | `0.79` | Overall harmonic mean balance |
 | **ROC-AUC** | `0.83` | Threshold-independent anomaly scoring |
-| **ROC-PR** | `0.74` | Threshold-independent anomaly scoring |
+| **PR-AUC** | `0.74` | Threshold-independent anomaly scoring |
 
 ## 🛠️ Architecture Design
 ![architecture design](/assets/architecture.png)
@@ -62,7 +62,7 @@ python -m src.run_data_preparation --config "config.yaml"
 
 Execute main script.py
 ```
-python main.py
+python main.py --mode train
 ```
 
 ## 📚 References
