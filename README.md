@@ -2,6 +2,10 @@
 
 Autoencoder architecture for time-series anomaly detection with a multi-scale encoder block and TCN residual blocks on the decoder layer.
 
+<p align="center">
+    <img src="/assets/time_series_reconstruction_mechanism.gif" />
+</p>
+
 ## Executive Summary
 This project implements an end-to-end unsupervised anomaly detection pipeline for multivariate time-series data in Cyber-Physical Systems. Trained exclusively on normal operational conditions, the autoencoder detects abnormal behaviours by measuring reconstruction error deviations against defined thresholds.
 
@@ -20,7 +24,9 @@ This project implements an end-to-end unsupervised anomaly detection pipeline fo
 | **PR-AUC** | `0.74` | Threshold-independent anomaly scoring |
 
 ## 🛠️ Architecture Design
-![architecture design](/assets/architecture.png)
+<p align ="center">
+    <img src="/assets/architecture.png" />
+</p>
 
 ## Project Structure
 ```
