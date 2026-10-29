@@ -1,29 +1,31 @@
 # Multi-Scale Temporal Convolutional Network Autoencoder
 
-Autoencoder architecture for time-series anomaly detection with a multi-scale encoder block and TCN residual blocks on the decoder layer.
-
 <p align="center">
     <img src="/assets/time_series_reconstruction_mechanism.gif" />
 </p>
 
-## Executive Summary
-This project implements an end-to-end unsupervised anomaly detection pipeline for multivariate time-series data in Cyber-Physical Systems. Trained exclusively on normal operational conditions, the autoencoder detects abnormal behaviours by measuring reconstruction error deviations against defined thresholds.
+Unsupervised, reconstruction-based anomaly detection for multivariate time series in Cyber-Physical Systems, using a multi-scale Temporal Convolutional Network (TCN) autoencoder. Evaluated on the SWaT water-treatment dataset.
 
-## Key Highlights
-* **Multi-Scale Feature Extraction:** Captures short-term spikes alongside long-range temporal dependencies across industrial sensors.
-* **Temporal Convolutional Network:** Applies causal dilated convolutions to expand receptive fields without recurring memory bottlenecks.
-* **Project Pipeline:** Modular codebase separating preprocessing, windowing, reconstruction-based inference, and metric evaluation.
+## Overview
+The model is trained only on **normal operation**, and at inference time, abnormal behaviour shows up as a high reconstruction error. Any points are flagged as anomalies when the scores exceeds a threshold set at the *n*-th percentile of training set reconstruction errors.
 
-### Performance Results
+### 🔑 Key Highlights
+* **Multi-Scale Feature Extraction:** encoder captures short-term spikes alongside long-range temporal dependencies across sensors.
+* **Temporal Convolutional Network:** causal dilated convolutions expand receptive fields without recurring memory bottlenecks.
+* **Modular Pipeline:** preprocessing, windowing, training, inference, and evaluation are separate modules.
+
+### 📈 Performance Results
 | Metric | Score | Notes |
 | :--- | :--- | :--- |
-| **Precision** | `0.99` | Minimized false positives during steady-state |
+| **Precision** | `0.99` | Few false positives during steady-state |
 | **Recall** | `0.65` | Capture rate on stealthy bias attacks |
-| **F1-Score** | `0.79` | Overall harmonic mean balance |
-| **ROC-AUC** | `0.83` | Threshold-independent anomaly scoring |
-| **PR-AUC** | `0.74` | Threshold-independent anomaly scoring |
+| **F1-Score** | `0.79` | Harmonic mean balance |
+| **ROC-AUC** | `0.83` | Threshold-independent ranking quality |
+| **PR-AUC** | `0.74` | Threshold-independent, reliable for class imbalance |
 
-## 🛠️ Architecture Design
+Precision and Recall depend on the chosen percentile threshold, while ROC and PR do not.
+
+## Architecture
 <p align ="center">
     <img src="/assets/architecture.png" />
 </p>
@@ -49,16 +51,16 @@ Multi-Scale-TCN-Autoencoder/
 ```
 
 ## Dataset
-The SWaT dataset used for this model could not be disclosed due to confidentiality. Therefore, the data path must be defined according to the user’s local environment. However, the dataset can be directly accessed upon request via:
-```
+The dataset used for this experiment is **Secure Water Treatment (SWaT)** froim iTrust, STUD. The data cannot publicly be disclosed due to confidentiality, therefore a formal request must be submittedd and a local path be configured in `config.yaml`.
+
+Request access:
 https://www.sutd.edu.sg/itrust/itrust-labs/datasets/dataset-characteristics/swat/
-```
 
 The raw data consists of two xlsx files:
 |File|Description|
 |:----|:----|
-|SWaT_Dataset_Normal_v1| 4 days normal operation for model training and validation |
-|SWaT_Dataset_Attack_v0| 7 days attacked operations for testing |
+|SWaT_Dataset_Normal_v1| 4 days normal operation for model training |
+|SWaT_Dataset_Attack_v0| 7 days attacked operation for validation and testing |
 
 ## Execution Sample
 Run data preparation
